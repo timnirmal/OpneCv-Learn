@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 
 # 1. Wrap Perspective
+from matplotlib import pyplot as plt
+
 """
 img = cv2.imread("Materials/cards.jpg")
 
@@ -224,6 +226,7 @@ cv2.destroyAllWindows()
 
 # 7. Contours
 
+"""
 # contours is a list of all the contours in the image
 # Each contour is a list of points (x, y)
 # Each contour is a closed shape with an area, a perimeter and a list of points (like borders)
@@ -256,5 +259,112 @@ cv2.imshow("Original", img)
 #cv2.imshow("Gray", gray)
 #cv2.imshow("Threshold", thresh)
 
+
+# Plotting the contours
+
+print(contours[2]) # First contour
+c = contours[2].reshape(558, 2) # Reshape the contour to a 4x2 matrix
+
+
+# Plot the contour
+plt.plot(c[:, 0], c[:, 1], 'r')
+plt.imshow(img)
+plt.show()
+
+# Plot each point of the contour
+for i in range(len(c)):
+    plt.plot(c[i, 0], c[i, 1], 'ro')
+plt.imshow(img)
+plt.show()
+
+c2 = contours[0].reshape(-1, 2)
+
+# Plot each point in img
+for x,y in c2:
+    cv2.circle(img, (x, y), 10, (255, 255, 0), -1)
+
+
+
+
+# Plotting the contours
+
+
+
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+"""
+
+# 8. Contour approximation
+
+"""
+# Approximate contours to polygons
+# cv2.approxPolyDP(contour, epsilon, closed)
+# contour: Input contour
+# epsilon: Accuracy of the approximation
+# closed: Whether or not to approximate a closed contour
+# cv2.arcLength(contour, closed)
+# contour: Input contour
+# closed: Whether or not to approximate a closed contour
+# cv2.contourArea(contour)
+# contour: Input contour
+# cv2.contourArea(contour, oriented)
+# contour: Input contour
+# oriented: Whether or not to compute the oriented contour area
+# cv2.contourArea(contour, oriented)
+# contour: Input contour
+# oriented: Whether or not to compute the oriented contour area
+# cv2.arcLength(contour, closed)
+# contour: Input contour
+# closed: Whether or not to approximate a closed contour
+# cv2.contourArea(contour, oriented)
+# contour: Input contour
+# oriented: Whether or not to compute the oriented contour area
+# cv2.contourArea(contour, oriented)
+# contour: Input contour
+# oriented: Whether or not to compute the oriented contour area
+
+img = cv2.imread('Materials/contour.png') # Read the image
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) # Convert to grayscale
+ret, thresh = cv2.threshold(gray, 230, 255, cv2.THRESH_BINARY_INV) # Threshold the image
+
+contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE) # Find contours
+
+cv2.drawContours(img, contours, -1, (0, 0, 0), 3) # Draw all the contours on the image
+
+print(len(contours)) # Number of contours
+
+
+
+
+# print(contours[2]) # First contour
+print("Number of Points before approximation: ", len(contours[2]))
+c = contours[2].reshape(-1, 2) # Reshape the contour to a 4x2 matrix
+
+
+for x,y in c:
+    cv2.circle(img, (x, y), 5, (0, 0, 255), -1)
+
+
+peri = cv2.arcLength(c, True) # Calculate the perimeter of the contour  # True: Approximate the contour
+approx = cv2.approxPolyDP(c, 0.04 * peri, True) # Approximate the contour
+# epislon: Accuracy of the approximation
+# True: Approximate the contour
+# peri: Calculate the perimeter of the contour
+# arcLength: for a closed contour, this function calculates the arc length, that is the sum of all the segment lengths
+
+approx = approx.reshape(-1, 2) # Reshape the contour to a 4x2 matrix
+
+print("Number of Points after approximation: ", len(approx))
+
+for x,y in approx:
+    cv2.circle(img, (x, y), 10, (255, 0, 0), -1)
+
+
+cv2.imshow("Original", img)
+
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+"""
