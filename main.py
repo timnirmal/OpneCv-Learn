@@ -1,12 +1,9 @@
 # In OpenCv its BGR not RGB
 
 import cv2
-import numpy as np
 
 # 1. Showing Image
 """"
-
-
 img = cv2.imread('Materials/car.jpg')
 # Read image black and white
 img_gray = cv2.imread('Materials/car.jpg', 0)
@@ -193,20 +190,163 @@ print(cv2.add(x , y))  # Since 260 > 255, This will save maximum values 255
 
 # 7. Threshold
 
-img = cv2.imread("Materials/bookpage.jpg")
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-ret, threshold = cv2.threshold(gray, 10, 255, cv2.THRESH_BINARY)
+"""
 # if f(x,y) < T:
 #   then f(x,y) = 0
 # else:
 #   f (x,y) = 255
 
+img = cv2.imread("Materials/bookpage.jpg")
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+# Simple Threshold
+ret, threshold = cv2.threshold(gray, 10, 255, cv2.THRESH_BINARY)
+# source, threshold, max value, ... (This is Global Threshold, Simple Threshold)
+
+# Adaptive Thresholding
+adaptive = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 115, 1)
+
 cv2.imshow("Original Image", img)
 cv2.imshow("Gray version", gray)
 cv2.imshow("Threshold Version 10", threshold)
+cv2.imshow("adaptive", adaptive)
+
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
+"""
 
+# 8. Threshold with Trackbar
+"""
+
+img = cv2.imread("Materials/bookpage.jpg")
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+
+# if f(x,y) < T:
+#   then f(x,y) = 0
+# else:
+#   f (x,y) = 255
+
+
+
+cv2.imshow("Original Image", img)
+cv2.imshow("Gray version", gray)
+
+
+
+def empty(i):
+    pass
+
+cv2.namedWindow("Trackbars")
+cv2.createTrackbar('Threshold', 'Trackbars', 0, 255, empty)
+# Trackbar name, window name, start value, max value, when we change value which fuction to call
+
+while True:
+    t = cv2.getTrackbarPos('Threshold', 'Trackbars')
+    ret, threshold = cv2.threshold(gray, t, 255, cv2.THRESH_BINARY)
+    cv2.imshow('threshold', threshold)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+"""
+
+# 9. Combine Images
+"""
+img = cv2.imread('Materials/car.jpg')
+logo = cv2.imread('Materials/logo.jpg')
+logo_png = cv2.imread('Materials/logo.png')
+
+rows, cols, channels = logo.shape
+roi = img[0:rows, 0:cols]
+
+logo_gray = cv2.cvtColor(logo, cv2.COLOR_BGR2GRAY)
+
+# Thresholding Gray Image
+# THRESH_BINARY -> if f(x,y)>10 then f(x,y)=0 else f(x,y)=255
+ret, mask = cv2.threshold(logo_gray, 10, 255, cv2.THRESH_BINARY)
+mask_inv = cv2.bitwise_not(mask)
+
+fg = cv2.bitwise_and(logo, logo, mask=mask)
+bg = cv2.bitwise_and(roi, roi, mask=mask_inv)
+
+cv2.imshow("Gray Logo", logo_gray)
+cv2.imshow("Mask", mask)
+cv2.imshow("Mask INV", mask_inv)
+cv2.imshow("fg", fg)
+cv2.imshow("bg", bg)
+
+dst = cv2.add(fg, bg)
+cv2.imshow("dst", dst)
+
+img[0:rows, 0:cols] = dst
+cv2.imshow("result", img)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+"""
+
+# 10. Edge Detection
+"""
+cap = cv2.VideoCapture(0)
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if ret:
+        cv2.imshow('Webcam', frame)
+        edge = cv2.Canny(frame, 100,200)
+        # threshold1, threshold2
+        cv2.imshow("edge", edge)
+    else:
+        break
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+
+"""
+
+# 10.1 Edge detection with Trackbars
+
+cap = cv2.VideoCapture(0)
+
+
+def empty(i):
+    pass
+
+
+height = 200
+width = 400
+
+# Trackbar name, window name, start value, max value, when we change value which fuction to call
+cv2.namedWindow("Threshold1")
+cv2.resizeWindow("Threshold1", width, height)
+
+cv2.createTrackbar('Threshold1', 'Threshold1', 0, 255, empty)
+cv2.createTrackbar('Threshold2', 'Threshold1', 0, 255, empty)
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    t1 = cv2.getTrackbarPos('Threshold1', 'Threshold1')
+    t2 = cv2.getTrackbarPos('Threshold2', 'Threshold1')
+
+    if ret:
+        #cv2.imshow('Webcam', frame)
+        edge = cv2.Canny(frame, t1, t2)
+        cv2.imshow("Threshold1", edge)
+    else:
+        break
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
